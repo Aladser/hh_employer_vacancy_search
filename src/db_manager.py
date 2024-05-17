@@ -3,6 +3,7 @@ import psycopg2
 
 class DBManager:
     """Взаимодействие с БД"""
+
     __schema_name = 'public'
     __conn_params: dict
 
@@ -20,11 +21,13 @@ class DBManager:
 
     def connect(self):
         """подключается к БД"""
+
         self.__conn = psycopg2.connect(**self.__conn_params)
         self.__cursor = self.__conn.cursor()
 
     def disconnect(self):
         """отключается от БД"""
+
         self.__conn.commit()
         self.__cursor.close()
         self.__conn.close()
@@ -66,8 +69,8 @@ class DBManager:
 
     def load_vacancies(self, vacancies_list: list):
         """загружает вакансии в БД"""
-        self.connect()
 
+        self.connect()
         # добавление вакансий в БД
         for vacancy in vacancies_list:
             # пропуск вакансий без указанной зарплаты
@@ -118,6 +121,7 @@ class DBManager:
 
     def remove_vacancies(self):
         """Удаляет вакансии из БД"""
+
         self.connect()
         self.__cursor.execute(f"delete from {self.__schema_name}.vacancies")
         self.disconnect()
@@ -133,3 +137,85 @@ class DBManager:
         employments_stat = self.__cursor.fetchall()
         self.disconnect()
         return [{'employer_name': item[0], 'vacancy_count': item[1]} for item in employments_stat]
+
+    def get_all_vacancies(self):
+        """получает список всех вакансий"""
+
+        self.connect()
+        query = (f"select vacancy_name, "
+                 f"vacancy_salary_from, vacancy_salary_to, vacancy_salary_currency, "
+                 f"vacancy_url, employer_name from {self.__schema_name}.vacancies "
+                 f"join {self.__schema_name}.employers using (employer_id)")
+        self.__cursor.execute(query)
+        raw_vacancies_list = self.__cursor.fetchall()
+        self.disconnect()
+
+        return self.__get_formatted_vacancies(raw_vacancies_list)
+
+    def get_avg_salary(self) -> dict:
+        """
+        получает среднюю начальную зарплату по вакансиям
+        :return: {величина, валюта}
+        """
+
+        self.connect()
+        query = "select avg(vacancy_salary_from) from vacancies where vacancies.vacancy_salary_currency = 'RUR'"
+        self.__cursor.execute(query)
+        avg_salary = self.__cursor.fetchall()
+        self.disconnect()
+        return {'value': int(avg_salary[0][0]), 'currency': 'RUR'}
+
+    def get_vacancies_with_higher_salary(self):
+        """получает список всех вакансий, у которых зарплата выше средней по всем вакансиям."""
+
+        self.connect()
+        query = ("select vacancy_name,"
+                 "vacancy_salary_from, vacancy_salary_to, vacancy_salary_currency,"
+                 "employer_name, vacancy_url from vacancies join employers using (employer_id) "
+                 "where vacancy_salary_from > ("
+                 "  select avg(vacancy_salary_from) from vacancies where vacancies.vacancy_salary_currency = 'RUR'"
+                 ") and vacancy_salary_currency = 'RUR'")
+        self.__cursor.execute(query)
+        raw_vacancies_list = self.__cursor.fetchall()
+        self.disconnect()
+
+        return self.__get_formatted_vacancies(raw_vacancies_list)
+
+    def get_vacancies_with_keyword(self, keyword=""):
+        """ получает список всех вакансий, в названии которых содержатся переданные в метод слова"""
+
+        self.connect()
+        query = (f"select vacancy_name, "
+                 f"vacancy_salary_from, vacancy_salary_to, vacancy_salary_currency, "
+                 f"employer_name, vacancy_url from vacancies join employers using (employer_id) "
+                 f"where vacancy_name like '%{keyword}%'")
+        self.__cursor.execute(query)
+        raw_vacancies_list = self.__cursor.fetchall()
+        self.disconnect()
+
+        return self.__get_formatted_vacancies(raw_vacancies_list)
+
+    @staticmethod
+    def __get_formatted_vacancies(raw_vacancies_list):
+        """преобразовать массив вакансий в словарь"""
+
+        vacancies_list = []
+        for vcn in raw_vacancies_list:
+            # парсинг зарплаты
+            if vcn[1] is not None and vcn[2] is not None:
+                salary = f"от {vcn[1]} до {vcn[2]} {vcn[3]}"
+            elif vcn[1] is not None:
+                salary = f"от {vcn[1]} {vcn[3]}"
+            elif vcn[2] is not None:
+                salary = f"до {vcn[2]} {vcn[3]}"
+            else:
+                salary = 'не указана'
+
+            vacancies_list.append({
+                'vacancy_name': vcn[0],
+                'salary': salary,
+                'employer_name': vcn[4],
+                'vacancy_url': vcn[5]
+            })
+
+        return vacancies_list
