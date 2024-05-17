@@ -34,8 +34,8 @@ class DBManager:
         self.__conn = None
         self.__cursor = None
 
-    def init(self, employers_list: list) -> None:
-        """Создает таблицы БД"""
+    def recreate_tables(self, employers_list: list) -> None:
+        """Пересоздает таблицы БД"""
 
         self.connect()
         self.__cursor.execute(f"create schema if not exists {self.__schema_name};")
