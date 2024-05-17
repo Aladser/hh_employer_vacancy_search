@@ -121,3 +121,16 @@ class DBManager:
         self.connect()
         self.__cursor.execute(f"delete from {self.__schema_name}.vacancies")
         self.disconnect()
+
+    def get_companies_and_vacancies_count(self):
+        """получает список всех компаний и количество вакансий у каждой компании"""
+
+        self.connect()
+        query = (f"select employer_name, count(*) as count "
+                 f"from {self.__schema_name}.vacancies join {self.__schema_name}.employers "
+                 f"on employers.employer_id = vacancies.employer_id "
+                 f"group by employer_name")
+        self.__cursor.execute(query)
+        employments_stat = self.__cursor.fetchall()
+        self.disconnect()
+        return [{'employer_name': item[0], 'vacancy_count': item[1]} for item in employments_stat]

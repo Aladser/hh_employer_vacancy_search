@@ -24,7 +24,9 @@ db_manager = DBManager(**conn_params)
 
 if __name__ == '__main__':
     # db_manager.init(employers_list)
-    db_manager.remove_vacancies()
+    #db_manager.remove_vacancies()
 
-    vacancies_list = hh_api.load_vacancies(employers_list)
-    db_manager.load_vacancies(vacancies_list)
+    #vacancies_list = hh_api.load_vacancies(employers_list)
+    #db_manager.load_vacancies(vacancies_list)
+    data = db_manager.get_companies_and_vacancies_count()
+    print(data)
