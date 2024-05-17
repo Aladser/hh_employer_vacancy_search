@@ -1,21 +1,10 @@
 import psycopg2
-import requests
+
+from src.api import HHApi
 
 SCHEMA_NAME = 'public'
 CONFIG_FILENAME = 'env'
 EMPLOYERS_FILENAME = 'employers'
-
-REQUEST_URL = 'https://api.hh.ru/vacancies'
-REQUEST_HEADERS = {'User-Agent': 'HH-User-Agent'}
-REQUEST_PAGE_COUNT = 4
-REQUEST_PARAMS = {
-    'order_by': 'salary_desc',
-    'area': 113,
-    'page': 0,
-    'per_page': 25,
-    'employer_id': 3529,
-    'text': ''
-}
 
 # -----БД СОЕДИНЕНИЕ-----
 conn_params = {}
@@ -25,13 +14,15 @@ with open(CONFIG_FILENAME, 'r') as file:
         value = value.replace('\n', '')
         conn_params[key] = value
 
-# -----СПИСОК КОМПАНИЙ-РАБОТОДАТЕЛЕЙ-----
+# -----СПИСОК КОМПАНИЙ-РАБОТОДАТЕЛЕЙ ИЗ ФАЙЛА-----
 employers_list = []
 with open(EMPLOYERS_FILENAME, 'r') as file:
     for line in file:
         id, name = line.split(':')
         name = name.replace('\n', '')
         employers_list.append({'id': int(id), 'name': name})
+
+hh_api = HHApi()
 
 if __name__ == '__main__':
     conn = psycopg2.connect(**conn_params)
@@ -71,18 +62,7 @@ if __name__ == '__main__':
     conn.commit()
 
     # -----запрос вакансий на api.hh.ru-----
-    vacancies_list = []
-    REQUEST_PARAMS['text'] = ''
-
-    # запрос вакансий
-    for employer in employers_list:
-        REQUEST_PARAMS['page'] = 0
-        REQUEST_PARAMS['employer_id'] = employer['id']
-        while REQUEST_PARAMS['page'] != REQUEST_PAGE_COUNT:
-            response = requests.get(REQUEST_URL, headers=REQUEST_HEADERS, params=REQUEST_PARAMS)
-            resp_vacancies = response.json()['items']
-            vacancies_list.extend(resp_vacancies)
-            REQUEST_PARAMS['page'] += 1
+    vacancies_list = hh_api.load_vacancies(employers_list)
 
     # добавление вакансии в БД
     for vcn in vacancies_list:
