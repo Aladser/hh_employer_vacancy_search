@@ -29,7 +29,7 @@ class HHApi(BasicApi):
             self.__params = params
 
     def load_vacancies(self, employers_list: list, keyword="") -> list:
-        """ Запрос вакансий на api.hh.ru """
+        """ получает вакансии с сайта api.hh.ru """
 
         vacancies_list = []
         self.__params['text'] = keyword
