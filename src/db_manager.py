@@ -63,6 +63,58 @@ class DBManager:
 
         self.disconnect()
 
+    def load_vacancies(self, vacancies_list: list):
+        """загружает вакансии в БД"""
+        self.connect()
+
+        # добавление вакансий в БД
+        for vacancy in vacancies_list:
+            # пропуск вакансий без указанной зарплаты
+            if vacancy['salary'] is None:
+                continue
+
+            # объект вакансии
+            db_vacancy = {
+                'id': int(vacancy['id']),
+                'name': vacancy['name'],
+                'salary_from': vacancy['salary']['from'],
+                'salary_to': vacancy['salary']['to'],
+                'salary_currency': vacancy['salary']['currency'],
+                'employer_id': int(vacancy['employer']['id']),
+                'url': vacancy['alternate_url']}
+
+            # добавление в БД
+            query = (f"insert into {self.__schema_name}.vacancies ("
+                     f"vacancy_id, vacancy_name, "
+                     f"employer_id, "
+                     f"vacancy_url, "
+                     f"vacancy_salary_currency,")
+
+            if db_vacancy['salary_from'] and db_vacancy['salary_to']:
+                query += 'vacancy_salary_from, vacancy_salary_to '
+            elif db_vacancy['salary_from']:
+                query += 'vacancy_salary_from '
+            else:
+                query += 'vacancy_salary_to '
+
+            query += (f") values ("
+                      f"{db_vacancy['id']}, '{db_vacancy['name']}', "
+                      f"{db_vacancy['employer_id']}, "
+                      f"'{db_vacancy['url']}', "
+                      f"'{db_vacancy['salary_currency']}', ")
+
+            if db_vacancy['salary_from'] and db_vacancy['salary_to']:
+                query += f"{db_vacancy['salary_from']}, {db_vacancy['salary_to']}"
+            elif db_vacancy['salary_from']:
+                query += f"{db_vacancy['salary_from']}"
+            else:
+                query += f"{db_vacancy['salary_to']}"
+
+            query += ") returning *"
+            self.__cursor.execute(query)
+
+        self.disconnect()
+
     def remove_vacancies(self):
         """Удаляет вакансии из БД"""
         self.connect()
