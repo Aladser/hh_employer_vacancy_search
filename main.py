@@ -1,13 +1,8 @@
-import psycopg2
-
-from src.api import HHApi
 from src import DBManager
-
-SCHEMA_NAME = 'public'
-CONFIG_FILENAME = 'env'
-EMPLOYERS_FILENAME = 'employers'
+from src.api import HHApi
 
 # -----БД СОЕДИНЕНИЕ-----
+CONFIG_FILENAME = 'env'
 conn_params = {}
 with open(CONFIG_FILENAME, 'r') as file:
     for line in file:
@@ -16,6 +11,7 @@ with open(CONFIG_FILENAME, 'r') as file:
         conn_params[key] = value
 
 # -----СПИСОК КОМПАНИЙ-РАБОТОДАТЕЛЕЙ ИЗ ФАЙЛА-----
+EMPLOYERS_FILENAME = 'employers'
 employers_list = []
 with open(EMPLOYERS_FILENAME, 'r') as file:
     for line in file:

@@ -2,6 +2,7 @@ import psycopg2
 
 
 class DBManager:
+    """Взаимодействие с БД"""
     __schema_name = 'public'
     __conn_params: dict
 
