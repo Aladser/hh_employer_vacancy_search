@@ -44,7 +44,7 @@ def url_vacancies(employments):
 @pytest.fixture
 def db_manager(conn_params, employments):
     db_manager = DBManager(**conn_params)
-    db_manager.init(employments)
+    db_manager.recreate_tables(employments)
     return db_manager
 
 
