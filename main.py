@@ -37,6 +37,7 @@ if __name__ == '__main__':
     conn = psycopg2.connect(**conn_params)
     cursor = conn.cursor()
 
+    """
     # -----Создание таблиц-----
     cursor.execute(f"create schema if not exists {SCHEMA_NAME};")
     cursor.execute(f"DROP TABLE IF EXISTS {SCHEMA_NAME}.vacancies")
@@ -47,6 +48,7 @@ if __name__ == '__main__':
                    f"employer_id bigint primary key,"
                    f"employer_name varchar(255) not null"
                    f")")
+                   
     # -----Вакансии-----
     cursor.execute(f"create table {SCHEMA_NAME}.vacancies("
                    f"vacancy_id bigint primary key,"
@@ -57,13 +59,15 @@ if __name__ == '__main__':
                    f"vacancy_salary_currency varchar(10),"
                    f"employer_id bigint references {SCHEMA_NAME}.employers(employer_id)"
                    f")")
-    conn.commit()
 
     # -----заполнение таблицы Работодатели-----
     for employer in employers_list:
         query = (f"insert into {SCHEMA_NAME}.employers (employer_id, employer_name) "
                  f"values({employer['id']}, '{employer['name']}') returning *")
         cursor.execute(query)
+    """
+
+    cursor.execute(f"delete from {SCHEMA_NAME}.vacancies")
     conn.commit()
 
     # -----запрос вакансий на api.hh.ru-----
