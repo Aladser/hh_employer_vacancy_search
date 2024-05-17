@@ -1,6 +1,7 @@
 import psycopg2
 
 from src.api import HHApi
+from src import DBManager
 
 SCHEMA_NAME = 'public'
 CONFIG_FILENAME = 'env'
@@ -23,47 +24,15 @@ with open(EMPLOYERS_FILENAME, 'r') as file:
         employers_list.append({'id': int(id), 'name': name})
 
 hh_api = HHApi()
+db_manager = DBManager(**conn_params)
 
 if __name__ == '__main__':
+    vacancies_list = hh_api.load_vacancies(employers_list)
+    # db_manager.init(employers_list)
+    db_manager.remove_vacancies()
+
     conn = psycopg2.connect(**conn_params)
     cursor = conn.cursor()
-
-    """
-    # -----Создание таблиц-----
-    cursor.execute(f"create schema if not exists {SCHEMA_NAME};")
-    cursor.execute(f"DROP TABLE IF EXISTS {SCHEMA_NAME}.vacancies")
-    cursor.execute(f"DROP TABLE IF EXISTS {SCHEMA_NAME}.employers")
-
-    # -----Работодатели-----
-    cursor.execute(f"create table {SCHEMA_NAME}.employers("
-                   f"employer_id bigint primary key,"
-                   f"employer_name varchar(255) not null"
-                   f")")
-                   
-    # -----Вакансии-----
-    cursor.execute(f"create table {SCHEMA_NAME}.vacancies("
-                   f"vacancy_id bigint primary key,"
-                   f"vacancy_name varchar(255) not null,"
-                   f"vacancy_url varchar(255),"
-                   f"vacancy_salary_from integer,"
-                   f"vacancy_salary_to integer,"
-                   f"vacancy_salary_currency varchar(10),"
-                   f"employer_id bigint references {SCHEMA_NAME}.employers(employer_id)"
-                   f")")
-
-    # -----заполнение таблицы Работодатели-----
-    for employer in employers_list:
-        query = (f"insert into {SCHEMA_NAME}.employers (employer_id, employer_name) "
-                 f"values({employer['id']}, '{employer['name']}') returning *")
-        cursor.execute(query)
-    """
-
-    cursor.execute(f"delete from {SCHEMA_NAME}.vacancies")
-    conn.commit()
-
-    # -----запрос вакансий на api.hh.ru-----
-    vacancies_list = hh_api.load_vacancies(employers_list)
-
     # добавление вакансии в БД
     for vcn in vacancies_list:
         # пропуск вакансий без указанной зарплаты
