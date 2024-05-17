@@ -127,8 +127,7 @@ class DBManager:
 
         self.connect()
         query = (f"select employer_name, count(*) as count "
-                 f"from {self.__schema_name}.vacancies join {self.__schema_name}.employers "
-                 f"on employers.employer_id = vacancies.employer_id "
+                 f"from {self.__schema_name}.vacancies join {self.__schema_name}.employers using (employer_id)"
                  f"group by employer_name")
         self.__cursor.execute(query)
         employments_stat = self.__cursor.fetchall()
