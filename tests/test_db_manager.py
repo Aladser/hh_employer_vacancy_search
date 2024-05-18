@@ -1,23 +1,14 @@
 import os.path
 import pytest
-from src import DBManager
+from src import DBManager, ConfigParser
 from src.api import HHApi
 
 
 @pytest.fixture
 def conn_params():
-    # путь до env
-    abs_path = os.path.dirname(os.path.abspath(__file__))
-    ENV_PATH = os.path.dirname(abs_path) + '/env'
-
-    # конфиги
-    conn_params = {}
-    with open(ENV_PATH, 'r') as file:
-        for line in file:
-            key, value = line.split(':')
-            value = value.replace('\n', '')
-            conn_params[key] = value
-    return conn_params
+    config_dir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.dirname(config_dir) + '/env'
+    return ConfigParser.parse(config_path)
 
 
 @pytest.fixture
