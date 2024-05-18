@@ -27,9 +27,7 @@ if __name__ == '__main__':
 
     print('/// -----Cписок всех вакансий с указанием названия компании, названия вакансии и зарплаты и ссылки на вакансию----- ///')
     vacancies_data = db_manager.get_all_vacancies()
-    for i in range(3):
-        DBManager.print_vacancy(vacancies_data[i])
-        print()
+    [DBManager.print_vacancy(vacancies_data[i]) for i in range(3)]
     print('---------------------------\n')
 
     avg_price = db_manager.get_avg_salary()
@@ -38,15 +36,11 @@ if __name__ == '__main__':
 
     print('/// -----Cписок всех вакансий, у которых зарплата выше средней по всем вакансиям---- ///')
     vacancies_data = db_manager.get_vacancies_with_higher_salary()
-    for i in range(5):
-        DBManager.print_vacancy(vacancies_data[i])
-        print()
+    [DBManager.print_vacancy(vacancies_data[i]) for i in range(5)]
     print('---------------------------\n')
 
 
     print('/// -----Cписок всех вакансий, в названии которых содержатся переданные в метод слова, например Менеджер----- ///')
     vacancies_data = db_manager.get_vacancies_with_keyword('Менеджер')
-    for i in range(5):
-        DBManager.print_vacancy(vacancies_data[i])
-        print()
+    [DBManager.print_vacancy(vacancies_data[i]) for i in range(5)]
     print('---------------------------\n')

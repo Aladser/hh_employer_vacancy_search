@@ -226,5 +226,5 @@ class DBManager:
         print(f"Название: {vcn['vacancy_name']}\n"
               f"Зарплата: {vcn['salary']}\n"
               f"Компания: {vcn['employer_name']}\n"
-              f"Ссылка на вакансию: {vcn['vacancy_url']}"
+              f"Ссылка на вакансию: {vcn['vacancy_url']}\n"
               )
