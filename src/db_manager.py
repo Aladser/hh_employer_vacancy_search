@@ -144,7 +144,7 @@ class DBManager:
         self.connect()
         query = (f"select vacancy_name, "
                  f"vacancy_salary_from, vacancy_salary_to, vacancy_salary_currency, "
-                 f"vacancy_url, employer_name from {self.__schema_name}.vacancies "
+                 f"employer_name, vacancy_url from {self.__schema_name}.vacancies "
                  f"join {self.__schema_name}.employers using (employer_id)")
         self.__cursor.execute(query)
         raw_vacancies_list = self.__cursor.fetchall()
@@ -219,3 +219,12 @@ class DBManager:
             })
 
         return vacancies_list
+
+    @staticmethod
+    def print_vacancy(vcn) -> None:
+        """форматированная печать вакансии"""
+        print(f"Название: {vcn['vacancy_name']}\n"
+              f"Зарплата: {vcn['salary']}\n"
+              f"Компания: {vcn['employer_name']}\n"
+              f"Ссылка на вакансию: {vcn['vacancy_url']}"
+              )

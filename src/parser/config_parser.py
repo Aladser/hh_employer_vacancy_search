@@ -1,4 +1,7 @@
-class ConfigParser:
+from src.parser.basic_file_parser import BasicFileParser
+
+
+class ConfigParser(BasicFileParser):
     @staticmethod
     def parse(abs_filepath):
         """парсит файлы-конфиги"""
