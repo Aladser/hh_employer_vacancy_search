@@ -1,11 +1,13 @@
 import os.path
 import pytest
-from src import DBManager, ConfigParser
+from src import DBManager
+from src.parser import ConfigParser, EmployerParser
 from src.api import HHApi
 
 
 @pytest.fixture
 def conn_params():
+    """параметры БД"""
     config_dir = os.path.dirname(os.path.abspath(__file__))
     config_path = os.path.dirname(config_dir) + '/env'
     return ConfigParser.parse(config_path)
@@ -13,17 +15,10 @@ def conn_params():
 
 @pytest.fixture
 def employments():
-    # путь до employers
+    """путь до employers"""
     abs_path = os.path.dirname(os.path.abspath(__file__))
-    EMPLOYERS_FILENAME = os.path.dirname(abs_path) + '/employers'
-
-    employers_list = []
-    with open(EMPLOYERS_FILENAME, 'r') as file:
-        for line in file:
-            id, name = line.split(':')
-            name = name.replace('\n', '')
-            employers_list.append({'id': int(id), 'name': name})
-    return employers_list
+    employments_filename = os.path.dirname(abs_path) + '/employers'
+    return EmployerParser.parse(employments_filename)
 
 
 @pytest.fixture
