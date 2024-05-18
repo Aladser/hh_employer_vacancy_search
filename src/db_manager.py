@@ -197,7 +197,7 @@ class DBManager:
 
     @staticmethod
     def __get_formatted_vacancies(raw_vacancies_list):
-        """преобразовать массив вакансий в словарь"""
+        """преобразовать двумерный массив вакансий в массив словарей"""
 
         vacancies_list = []
         for vcn in raw_vacancies_list:
